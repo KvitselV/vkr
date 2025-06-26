@@ -1,0 +1,12 @@
+{% extends 'documents/base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Удалить документ "{{ document.title }}"?</h2>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Удалить</button>
+        <a href="{% url 'client_list' %}" class="btn btn-secondary">Отмена</a>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,29 @@
+{% extends 'documents/base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Список клиентов и их документов</h2>
+    <div class="list-group">
+        {% for client in clients_with_documents %}
+        <div class="list-group-item">
+            <h5>{{ client.name }}</h5>
+            <ul class="list-group">
+                {% for doc in client.documents.all %}
+                <li class="list-group-item">
+                    {{ doc.title }}
+                    <span class="badge bg-primary float-end">{{ doc.get_category_display }}</span>
+                    <span class="badge bg-secondary float-end me-2">{{ doc.status }}</span>
+                    <a href="{% url 'document_edit' doc.pk %}" class="btn btn-sm btn-warning">Редактировать</a>
+                    <a href="{% url 'document_delete' doc.pk %}" class="btn btn-sm btn-danger">Удалить</a>
+                </li>
+                {% empty %}
+                <li class="list-group-item">Нет документов</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% empty %}
+        <div class="list-group-item">Нет клиентов</div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

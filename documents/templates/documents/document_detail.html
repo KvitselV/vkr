@@ -1,0 +1,68 @@
+{% extends 'documents/base.html' %}  <!-- Изменили наследование -->
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header">
+            <h2>{{ document.title }}</h2>
+            <a href="{% url 'client_list' %}" class="btn btn-sm btn-outline-secondary">Назад</a>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>Информация:</h5>
+                    <p><strong>Клиент:</strong> {{ document.client.name }}</p>
+                    <p><strong>Категория:</strong> {{ document.get_category_display }}</p>
+                    <p><strong>Дата загрузки:</strong> {{ document.upload_date|date:"d.m.Y H:i" }}</p>
+                    <p><strong>Срок:</strong> {{ document.deadline|date:"d.m.Y"|default:"Не указан" }}</p>
+                    <p><strong>Статус:</strong>
+                    {% if document.status == 'draft' %}
+                        <span class="badge bg-secondary">Черновик</span>
+                    {% elif document.status == 'in_progress' %}
+                        <span class="badge bg-warning">На рассмотрении</span>
+                    {% elif document.status == 'approved' %}
+                        <span class="badge bg-success">Утвержден</span>
+                    {% elif document.status == 'rejected' %}
+                        <span class="badge bg-danger">Отклонен</span>
+                    {% endif %}
+                    </p>
+
+                    <!-- Проверка наличия файла -->
+                    {% if document.file %}
+                    <a href="{{ document.file.url }}" download class="btn btn-primary mt-3">
+                        Скачать документ
+                    </a>
+                    {% else %}
+                    <p class="text-muted">Файл документа отсутствует.</p>
+                    {% endif %}
+                </div>
+                <div class="col-md-6">
+                    <h5>Превью:</h5>
+                    <!-- Проверка наличия файла и его формата -->
+                    {% if document.file %}
+                        {% with file_extension=document.file.url|lower|slice:"-4:" %}
+                            {% if file_extension == '.pdf' %}
+                                <embed src="{{ document.file.url }}" type="application/pdf" width="100%" height="400px">
+                            {% elif file_extension == '.jpg' or file_extension == '.jpeg' or file_extension == '.png' or file_extension == '.gif' %}
+                                <img src="{{ document.file.url }}" alt="Превью документа" class="img-fluid">
+                            {% else %}
+                                <div class="alert alert-info">
+                                    Превью недоступно для этого типа файла
+                                </div>
+                            {% endif %}
+                        {% endwith %}
+                    {% else %}
+                        <div class="alert alert-info">
+                            Файл документа отсутствует
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="mt-3">
+                <a href="{% url 'document_edit' document.id %}" class="btn btn-sm btn-outline-primary">Редактировать</a>
+                <a href="{% url 'document_delete' document.id %}" class="btn btn-sm btn-outline-danger">Удалить</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

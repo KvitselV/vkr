@@ -1,0 +1,46 @@
+{% extends 'documents/base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card shadow-lg">
+        <div class="card-header bg-primary text-white">
+            <h3 class="mb-0">{{ case.title }}</h3>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>Категория:</strong> {{ case.get_category_display }}</p>
+                    <p><strong>Статус:</strong>
+                        <span class="badge {% if case.status == 'open' %}bg-info{% elif case.status == 'in_progress' %}bg-warning{% elif case.status == 'closed' %}bg-success{% endif %}">
+                            {{ case.get_status_display }}
+                        </span>
+                    </p>
+                    <p><strong>Описание:</strong> {{ case.description|default:"Нет описания" }}</p>
+                    <p><strong>Заметки:</strong> {{ case.notes|default:"Нет заметок" }}</p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>Клиенты:</strong></p>
+                    <ul>
+                        {% for client in case.clients.all %}
+                            <li>{{ client.name }}</li>
+                        {% empty %}
+                            <li>Нет клиентов</li>
+                        {% endfor %}
+                    </ul>
+                    <p><strong>Документы:</strong></p>
+                    <ul>
+                        {% for document in case.documents.all %}
+                            <li>{{ document.title }}</li>
+                        {% empty %}
+                            <li>Нет документов</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+            <div class="mt-4">
+                <a href="{% url 'case_list' %}" class="btn btn-secondary">Назад к списку дел</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,9 @@
+{% extends 'documents/base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Ошибка удаления</h2>
+    <p>{{ error_message }}</p>
+    <a href="{% url 'client_list' %}" class="btn btn-secondary">Вернуться к списку клиентов</a>
+</div>
+{% endblock %}

@@ -1,0 +1,26 @@
+{% extends 'documents/base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Выберите шаблон документа</h2>
+    <div class="row">
+        {% for template in templates %}
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">{{ template.name }}</h5>
+                    <p class="card-text">{{ template.description }}</p>
+                    <a href="{% url 'document_create_from_template' template.pk %}" class="btn btn-primary">
+                        <i class="fa-solid fa-file-pdf"></i> Создать документ
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-md-12">
+            <p>Нет доступных шаблонов.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

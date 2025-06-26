@@ -1,0 +1,125 @@
+{% extends 'documents/base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <!-- Левая колонка: Клиенты и документы -->
+        <div class="col-md-12"> <!-- Увеличиваем ширину до 12 колонок -->
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2>Клиентская база</h2>
+                <a href="{% url 'client_create' %}" class="btn btn-primary">
+                    <i class="fa-solid fa-plus"></i> <!-- Иконка "плюс" -->
+                </a>
+            </div>
+
+            <!-- Форма фильтрации -->
+            <form method="get" class="mb-3">
+                <div class="input-group">
+                    <input type="text" name="query" class="form-control" placeholder="Поиск клиента" value="{{ query }}">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fa-solid fa-magnifying-glass"></i> <!-- Иконка "поиск" -->
+                    </button>
+                </div>
+            </form>
+
+            <!-- Список клиентов -->
+            {% if page_obj %}
+                <div class="list-group">
+                    {% for client in page_obj %}
+                    <div class="list-group-item">
+                        <h5>{{ client.name }}</h5>
+                        <p><strong>ИНН:</strong> {{ client.inn }}</p>
+                        <p><strong>Адрес:</strong> {{ client.address }}</p>
+                        <p><strong>Владелец:</strong> {{ client.created_by.username }}</p>
+
+                        <!-- Форма для передачи клиента -->
+                        <form method="post" class="mb-3">
+                            {% csrf_token %}
+                            <input type="hidden" name="client_pk" value="{{ client.pk }}">
+                            <div class="d-flex gap-2 align-items-center">
+                                {{ form.new_owner }}
+                                <button type="submit" name="transfer_client" class="btn btn-success btn-sm">
+                                    <i class="fa-solid fa-arrow-right"></i> Передать
+                                </button>
+                            </div>
+                        </form>
+
+                        <ul class="list-group">
+                            {% for doc in client.documents.all %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span>{{ doc.title }}</span>
+                                    <span class="badge bg-secondary ms-2">{{ doc.get_category_display }}</span> <!-- Отображение категории -->
+                                    <span class="status-circle" style="background-color: {% if doc.status == 'draft' %}gray{% elif doc.status == 'in_progress' %}orange{% elif doc.status == 'approved' %}green{% elif doc.status == 'rejected' %}red{% endif %};"></span>
+                                </div>
+                                <div>
+                                    <a href="{% url 'document_detail' doc.pk %}" class="btn btn-info btn-sm">
+                                        <i class="fa-solid fa-eye"></i> <!-- Иконка "просмотр" -->
+                                    </a>
+                                    <a href="{% url 'document_edit' doc.pk %}" class="btn btn-warning btn-sm">
+                                        <i class="fa-solid fa-pen-to-square"></i> <!-- Иконка "редактировать" -->
+                                    </a>
+                                    <a href="{% url 'document_delete' doc.pk %}" class="btn btn-danger btn-sm">
+                                        <i class="fa-solid fa-trash"></i> <!-- Иконка "удалить" -->
+                                    </a>
+                                </div>
+                            </li>
+                            {% empty %}
+                            <li class="list-group-item">Нет документов</li>
+                            {% endfor %}
+                        </ul>
+                        <div class="d-flex gap-2 mt-2">
+                            <a href="{% url 'client_edit' client.pk %}" class="btn btn-warning btn-sm">
+                                <i class="fa-solid fa-pen-to-square"></i> <!-- Иконка "редактировать" -->
+                            </a>
+                            <a href="{% url 'client_delete' client.pk %}" class="btn btn-danger btn-sm">
+                                <i class="fa-solid fa-trash"></i> <!-- Иконка "удалить" -->
+                            </a>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="list-group-item">Нет клиентов</div>
+                    {% endfor %}
+                </div>
+
+                <!-- Пагинация -->
+                <nav aria-label="Page navigation" class="mt-4">
+                    <ul class="pagination justify-content-center">
+                        {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page=1{% if query %}&query={{ query }}{% endif %}">
+                                    <i class="fa-solid fa-angles-left"></i> <!-- Иконка "первая страница" -->
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if query %}&query={{ query }}{% endif %}">
+                                    <i class="fa-solid fa-angle-left"></i> <!-- Иконка "назад" -->
+                                </a>
+                            </li>
+                        {% endif %}
+
+                        <li class="page-item disabled">
+                            <a class="page-link" href="#">
+                                Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}
+                            </a>
+                        </li>
+
+                        {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if query %}&query={{ query }}{% endif %}">
+                                    <i class="fa-solid fa-angle-right"></i> <!-- Иконка "вперед" -->
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if query %}&query={{ query }}{% endif %}">
+                                    <i class="fa-solid fa-angles-right"></i> <!-- Иконка "последняя страница" -->
+                                </a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

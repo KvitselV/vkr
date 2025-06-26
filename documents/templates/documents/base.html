@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Система электронного документооборота{% endblock %}</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"  rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"  rel="stylesheet">
+    <style>
+        .status-circle {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-left: 10px;
+        }
+    </style>
+    <script src="https://unpkg.com/mammoth/mammoth.browser.min.js"></script>
+</head>
+<body>
+    <!-- Навигационная панель -->
+   <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{% url 'client_list' %}">Документооборот</a>
+            <div class="collapse navbar-collapse">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'client_list' %}">Главная</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'client_base' %}active{% endif %}" href="{% url 'client_base' %}">
+                            Клиентская база
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'case_list' %}">Список дел</a>
+                    </li>
+                </ul>
+            </div>
+            <div class="d-flex ms-auto">
+                {% if user.is_authenticated %}
+                <span class="navbar-text me-3">
+                    Привет, {{ user.username }}
+                    {% if user.userprofile.is_online %}
+                        <span class="badge bg-success">Онлайн</span>
+                    {% else %}
+                        <span class="badge bg-secondary">Оффлайн</span>
+                    {% endif %}
+                </span>
+                <a href="{% url 'logout' %}" class="btn btn-outline-danger">Выйти</a>
+            {% else %}
+                <a href="{% url 'login' %}" class="btn btn-outline-primary me-2">Войти</a>
+                <a href="{% url 'register' %}" class="btn btn-primary">Регистрация</a>
+            {% endif %}
+            </div>
+        </div>
+   </nav>
+
+
+    <!-- Основной контент -->
+    <div class="container mt-4">
+        {% block content %}
+        {% endblock %}
+    </div>
+
+    <!-- Скрипты -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Глобальный обработчик CSRF-токена для AJAX-запросов
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.startsWith('csrftoken=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(10));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        const csrftoken = getCookie('csrftoken');
+
+        // Обработка форм через Fetch API
+        document.addEventListener('DOMContentLoaded', function() {
+            // Обработка формы документа (если она есть на странице)
+            const documentForm = document.getElementById('documentForm');
+            if (documentForm) {
+                documentForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    const formData = new FormData(this);
+
+                    fetch('', {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-CSRFToken': csrftoken,
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                    .then(response => {
+                        if (response.ok) {
+                            window.location.reload();
+                        } else {
+                            return response.json().then(data => {
+                                const errorMessages = Object.values(data.errors).join('\n');
+                                alert(`Ошибка:\n${errorMessages}`);
+                            });
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+                });
+            }
+        });
+    </script>
+</body>
+</html>
